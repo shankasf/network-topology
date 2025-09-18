@@ -8,7 +8,7 @@ This lab establishes a comprehensive virtual network security test environment u
 
 ```
                     ┌─────────────────────────────────────────────────────────────────┐
-                    │                    INTERNET CONNECTION                          │
+                    │                    VMWARE WORKSTATION PRO                          │
                     │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
                     │  │   Web       │  │   Cloud     │  │   External  │            │
                     │  │ Services    │  │ Services    │  │   APIs      │            │
@@ -27,7 +27,7 @@ This lab establishes a comprehensive virtual network security test environment u
                     │  │              Subnet: 192.168.1.0/24                    │   │
                     │  │              Mask: 255.255.255.0                       │   │
                     │  │              Gateway: 192.168.1.1                      │   │
-                    │  │              Internet: Via NAT                          │   │
+                    │  │              Internal Communication Only                          │   │
                     │  └─────────────────────────────────────────────────────────┘   │
                     └─────────────────────┬───────────────────────────────────────────┘
                                           │
