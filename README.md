@@ -4,87 +4,110 @@
 
 This lab establishes a comprehensive virtual network security test environment using VMware Workstation as the hypervisor platform.
 
-### Network Architecture Overview
+### Combined Network Architecture & Flow Diagram
 
 ```
-                    ┌─────────────────────────────────────────┐
-                    │        VMWARE WORKSTATION PRO           │
-                    │           (Hypervisor Host)             │
-                    │      Host OS: Windows 10/11             │
-                    └─────────────────┬───────────────────────┘
-                                      │
-                    ┌─────────────────▼───────────────────────┐
-                    │        VIRTUAL NETWORK LAYER           │
-                    │                                         │
-                    │  ┌─────────────────────────────────┐   │
-                    │  │        VMnet8 (NAT)             │   │
-                    │  │    Subnet: 192.168.1.0/24      │   │
-                    │  │    Gateway: 192.168.1.1         │   │
-                    │  │    Internet: Via NAT            │   │
-                    │  └─────────────────────────────────┘   │
-                    └─────────────────┬───────────────────────┘
-                                      │
-                    ┌─────────────────▼───────────────────────┐
-                    │         VIRTUAL SWITCH                 │
-                    │      (Internal Communication)          │
-                    └─────┬───────────┬───────────┬───────────┘
-                          │           │           │
-                          │           │           │
-        ┌─────────────────▼─┐   ┌─────▼─────┐   ┌─▼─────────────────┐
-        │                   │   │           │   │                   │
-        │  WINDOWS SERVER   │   │ WINDOWS 11│   │   KALI LINUX      │
-        │      2022         │   │  CLIENT   │   │  ATTACK PLATFORM  │
-        │                   │   │           │   │                   │
-        │  ┌─────────────┐  │   │ ┌───────┐ │   │  ┌─────────────┐  │
-        │  │   DOMAIN    │  │   │ │ DOMAIN│ │   │  │  PENETRATION│  │
-        │  │ CONTROLLER  │  │   │ │MEMBER │ │   │  │   TESTING   │  │
-        │  │             │  │   │ │       │ │   │  │             │  │
-        │  │  AD DS      │  │   │ │       │ │   │  │             │  │
-        │  │  DNS        │  │   │ │       │ │   │  │             │  │
-        │  │  DHCP       │  │   │ │       │ │   │  │             │  │
-        │  └─────────────┘  │   │ └───────┘ │   │  └─────────────┘  │
-        │                   │   │           │   │                   │
-        │ IP: 192.168.1.2   │   │IP:192.168.│   │ IP: 192.168.1.101 │
-        │ DNS: 192.168.1.2  │   │1.100     │   │ DNS: 192.168.1.2  │
-        │ Domain: hacker.   │   │DNS: 192. │   │ Domain: hacker.   │
-        │ testlab           │   │168.1.2   │   │ testlab           │
-        │                   │   │Domain:   │   │                   │
-        │ Creds: HACKER\    │   │hacker.   │   │ Creds: HACKER\    │
-        │ Administrator     │   │testlab   │   │ sagar             │
-        │                   │   │          │   │                   │
-        │ Creds: HACKER\    │   │ Creds:   │   │                   │
-        │ sagar             │   │ HACKER\  │   │                   │
-        │                   │   │ sagar    │   │                   │
-        └───────────────────┘   └──────────┘   └───────────────────┘
-```
+                    ┌─────────────────────────────────────────────────────────────────┐
+                    │                    INTERNET CONNECTION                          │
+                    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+                    │  │   Web       │  │   Cloud     │  │   External  │            │
+                    │  │ Services    │  │ Services    │  │   APIs      │            │
+                    │  └─────────────┘  └─────────────┘  └─────────────┘            │
+                    └─────────────────────┬───────────────────────────────────────────┘
+                                          │
+                                          │ NAT Translation
+                                          │ Gateway: 192.168.1.1
+                    ┌─────────────────────▼───────────────────────────────────────────┐
+                    │                VMWARE WORKSTATION PRO                          │
+                    │                   (Hypervisor Host)                            │
+                    │              Host OS: Windows 10/11                            │
+                    │                                                               │
+                    │  ┌─────────────────────────────────────────────────────────┐   │
+                    │  │              VIRTUAL NETWORK: VMnet8                    │   │
+                    │  │              Subnet: 192.168.1.0/24                    │   │
+                    │  │              Mask: 255.255.255.0                       │   │
+                    │  │              Gateway: 192.168.1.1                      │   │
+                    │  │              Internet: Via NAT                          │   │
+                    │  └─────────────────────────────────────────────────────────┘   │
+                    └─────────────────────┬───────────────────────────────────────────┘
+                                          │
+                                          │ Virtual Switch (Internal Communication)
+                    ┌─────────────────────▼───────────────────────────────────────────┐
+                    │                    VIRTUAL SWITCH                               │
+                    │              (VMnet8 Internal Hub)                             │
+                    │                                                               │
+                    │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐        │
+                    │  │   vNIC 1    │    │   vNIC 2    │    │   vNIC 3    │        │
+                    │  │  Ethernet0  │    │  Ethernet0  │    │  Ethernet0  │        │
+                    │  └─────────────┘    └─────────────┘    └─────────────┘        │
+                    └─────┬───────────────────┬───────────────────┬───────────────────┘
+                          │                   │                   │
+                          │                   │                   │
+        ┌─────────────────▼─┐       ┌─────────▼─────┐       ┌─────▼─────────────────┐
+        │                   │       │               │       │                       │
+        │  WINDOWS SERVER   │       │  WINDOWS 11   │       │    KALI LINUX         │
+        │      2022         │       │    CLIENT     │       │  ATTACK PLATFORM      │
+        │                   │       │               │       │                       │
+        │  ┌─────────────┐  │       │ ┌───────────┐ │       │  ┌─────────────────┐  │
+        │  │   DOMAIN    │  │       │ │  DOMAIN   │ │       │  │   PENETRATION   │  │
+        │  │ CONTROLLER  │  │       │ │  MEMBER   │ │       │  │    TESTING      │  │
+        │  │             │  │       │ │           │ │       │  │                 │  │
+        │  │  AD DS      │  │       │ │           │ │       │  │  Security Tools │  │
+        │  │  DNS        │  │       │ │           │ │       │  │  & Frameworks   │  │
+        │  │  DHCP       │  │       │ │           │ │       │  │                 │  │
+        │  └─────────────┘  │       │ └───────────┘ │       │  └─────────────────┘  │
+        │                   │       │               │       │                       │
+        │ IP: 192.168.1.2   │       │IP: 192.168.1. │       │ IP: 192.168.1.101     │
+        │ Mask: 255.255.255.│       │100            │       │ Mask: 255.255.255.0   │
+        │0                  │       │Mask: 255.255. │       │                       │
+        │ DNS: 192.168.1.2  │       │255.0          │       │ DNS: 192.168.1.2      │
+        │ (self)            │       │DNS: 192.168.1.│       │ (DC)                  │
+        │                   │       │2 (DC)         │       │                       │
+        │ Domain:           │       │               │       │ Domain:               │
+        │ hacker.testlab    │       │ Domain:       │       │ hacker.testlab        │
+        │ NetBIOS: HACKER   │       │ hacker.testlab│       │                       │
+        │                   │       │               │       │                       │
+        │ Credentials:      │       │               │       │ Credentials:          │
+        │ HACKER\Admin      │       │ Credentials:  │       │ HACKER\sagar          │
+        │ HACKER\sagar      │       │ HACKER\sagar  │       │                       │
+        │                   │       │               │       │                       │
+        │ Services:         │       │               │       │ Tools:                │
+        │ • AD DS           │       │ Status:       │       │ • Nmap                │
+        │ • DNS Server      │       │ Domain Joined │       │ • Metasploit          │
+        │ • File Services   │       │               │       │ • Wireshark           │
+        │ • Group Policy    │       │               │       │ • Burp Suite          │
+        └───────────────────┘       └───────────────┘       └───────────────────────┘
+                  │                           │                           │
+                  │                           │                           │
+                  └───────────┬───────────────┴───────────────┬───────────┘
+                              │                               │
+                              │ Domain Authentication         │ Security Testing
+                              │ & Management                  │ & Analysis
+                              │                               │
+                    ┌─────────▼─────────┐           ┌─────────▼─────────┐
+                    │   DOMAIN SERVICES │           │  ATTACK VECTOR    │
+                    │                   │           │   SIMULATION      │
+                    │ • User Auth       │           │                   │
+                    │ • Policy Mgmt     │           │ • Vulnerability   │
+                    │ • DNS Resolution  │           │   Assessment      │
+                    │ • File Sharing    │           │ • Penetration     │
+                    │ • Group Policy    │           │   Testing         │
+                    │ • Security Logs   │           │ • Network         │
+                    └───────────────────┘           │   Monitoring      │
+                                                    │ • Malware         │
+                                                    │   Analysis        │
+                                                    └───────────────────┘
 
-### Network Flow Diagram
-
-```
-    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-    │   INTERNET      │    │   HOST SYSTEM   │    │  VIRTUAL LAB    │
-    │                 │    │                 │    │   ENVIRONMENT   │
-    │  ┌───────────┐  │    │  ┌───────────┐  │    │                 │
-    │  │   Web     │  │    │  │  VMware   │  │    │  ┌─────────────┐ │
-    │  │ Services  │  │◄──►│  │Workstation│  │◄──►│  │   Windows   │ │
-    │  │           │  │    │  │           │  │    │  │   Server    │ │
-    │  │  Cloud    │  │    │  │  Host OS  │  │    │  │    2022     │ │
-    │  │ Services  │  │    │  │           │  │    │  │     (DC)    │ │
-    │  └───────────┘  │    │  └───────────┘  │    │  └─────────────┘ │
-    └─────────────────┘    └─────────────────┘    │         │       │
-                                                  │         │       │
-                                                  │  ┌──────▼───┐   │
-                                                  │  │ Windows  │   │
-                                                  │  │   11     │   │
-                                                  │  │ (Client) │   │
-                                                  │  └──────────┘   │
-                                                  │         │       │
-                                                  │  ┌──────▼───┐   │
-                                                  │  │   Kali   │   │
-                                                  │  │  Linux   │   │
-                                                  │  │(Attacker)│   │
-                                                  │  └──────────┘   │
-                                                  └─────────────────┘
+DATA FLOW ARROWS:
+Internet ◄──► Host System ◄──► Virtual Switch ◄──► VMs
+    │              │                │              │
+    │              │                │              ├──► DC (Auth/DNS)
+    │              │                │              ├──► Client (Domain)
+    │              │                │              └──► Kali (Testing)
+    │              │                │
+    │              │                └──► Internal Communication
+    │              │
+    └──► External Services & APIs
 ```
 
 ## Device Specifications

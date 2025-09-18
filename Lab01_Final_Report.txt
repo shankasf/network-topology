@@ -1,0 +1,205 @@
+Network Security Lab Report
+Lab 01: Virtual Network Security Test Lab Implementation
+
+Student: [Your Name]
+Date: [Current Date]
+Course: Network Security
+Instructor: [Instructor Name]
+
+================================================================================
+
+EXECUTIVE SUMMARY
+
+This laboratory exercise focused on establishing a comprehensive virtual network security testing environment using industry-standard virtualization technologies. The primary objective was to create an isolated, secure sandbox environment capable of supporting advanced security testing, malware analysis, and penetration testing activities while maintaining complete separation from production network infrastructure.
+
+The implementation successfully deployed a three-tier virtual architecture consisting of a Windows Server 2022 Domain Controller, a Windows 11 client workstation, and a Kali Linux attack platform, all interconnected through a virtualized network infrastructure. The environment demonstrates proper network segmentation, domain-based authentication, and security isolation principles essential for professional security testing operations.
+
+================================================================================
+
+LABORATORY OBJECTIVES AND METHODOLOGY
+
+PRIMARY OBJECTIVES:
+1. Establish a virtualized hypervisor environment using VMware Workstation Pro
+2. Deploy and configure a Windows Server 2022 Domain Controller with Active Directory services
+3. Create and configure a Windows 11 client machine joined to the domain environment
+4. Prepare a Kali Linux virtual machine for offensive security testing capabilities
+5. Implement proper network segmentation and security isolation
+6. Verify complete functionality of all components and inter-system communication
+
+METHODOLOGY:
+The laboratory implementation followed a systematic approach beginning with hypervisor configuration, followed by sequential deployment of virtual machines, network configuration, domain services implementation, and comprehensive testing and verification procedures.
+
+================================================================================
+
+TECHNICAL IMPLEMENTATION
+
+HYPERVISOR CONFIGURATION:
+VMware Workstation Pro was selected as the primary hypervisor platform due to its robust feature set, professional-grade virtualization capabilities, and compatibility with security testing tools. The hypervisor was installed on a Windows 10/11 host system and configured with VMnet8 virtual network adapter providing NAT connectivity for internet access while maintaining network isolation.
+
+VIRTUAL MACHINE DEPLOYMENT:
+
+Windows Server 2022 Domain Controller:
+The domain controller was deployed using Windows Server 2022 Standard edition with Desktop Experience to provide both command-line and graphical management capabilities. The server was configured with static IP addressing (192.168.1.2/24) and configured as the primary DNS server for the virtual network. Active Directory Domain Services and DNS Server roles were installed and configured to create the "hacker.testlab" domain with NetBIOS name "HACKER".
+
+Key configuration steps included:
+- Static IP configuration with self-referencing DNS
+- Installation of Active Directory Domain Services role
+- Domain promotion process creating new forest
+- DNS forwarder configuration for internet resolution
+- Domain user account creation and management
+
+Windows 11 Client Workstation:
+The client machine was deployed using Windows 11 Education edition and configured with static IP addressing (192.168.1.100/24). The machine was successfully joined to the hacker.testlab domain, enabling domain-based authentication and centralized user management. DNS configuration was set to point to the domain controller for proper name resolution.
+
+Kali Linux Attack Platform:
+Kali Linux was deployed as the third virtual machine with static IP addressing (192.168.1.101/24). The system was configured to use the domain controller for DNS resolution and prepared for future offensive security testing exercises. Network configuration was implemented using Netplan for modern Ubuntu/Debian-based systems.
+
+NETWORK ARCHITECTURE:
+The virtual network was designed using a single subnet (192.168.1.0/24) with all virtual machines connected through VMware's virtual switch infrastructure. This design provides adequate isolation while enabling necessary inter-system communication for domain services and security testing activities.
+
+================================================================================
+
+CONFIGURATION COMMANDS AND PROCEDURES
+
+WINDOWS SERVER 2022 CONFIGURATION:
+
+Network Interface Configuration:
+- IP Address: 192.168.1.2
+- Subnet Mask: 255.255.255.0
+- Default Gateway: 192.168.1.1
+- Preferred DNS: 192.168.1.2 (self)
+
+Active Directory Installation:
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+
+Domain Controller Promotion:
+Install-ADDSForest -DomainName "hacker.testlab" -DomainNetbiosName "HACKER" -SafeModeAdministratorPassword (Read-Host -AsSecureString) -Force
+
+DNS Forwarder Configuration:
+Add-DnsServerForwarder -IPAddress 1.1.1.1,8.8.8.8
+
+WINDOWS 11 CLIENT CONFIGURATION:
+
+Network Interface Configuration:
+- IP Address: 192.168.1.100
+- Subnet Mask: 255.255.255.0
+- Default Gateway: 192.168.1.1
+- Preferred DNS: 192.168.1.2 (Domain Controller)
+
+Domain Join Process:
+- System Properties → Computer Name → Change
+- Member of: Domain
+- Domain: hacker.testlab
+- Credentials: HACKER\Administrator
+
+KALI LINUX CONFIGURATION:
+
+Netplan Configuration (/etc/netplan/01-lab.yaml):
+network:
+  version: 2
+  ethernets:
+    ens33:
+      dhcp4: no
+      addresses: [192.168.1.101/24]
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [192.168.1.2]
+        search: [hacker.testlab]
+
+Configuration Application:
+sudo netplan apply
+
+================================================================================
+
+TROUBLESHOOTING AND PROBLEM RESOLUTION
+
+DNS RESOLUTION ISSUES:
+Initial connectivity problems were encountered due to incorrect DNS configuration on client machines. The issue was resolved by ensuring all client machines pointed to the domain controller (192.168.1.2) as their primary DNS server rather than using public DNS servers.
+
+ADMINISTRATOR PASSWORD COMPLEXITY:
+Domain controller promotion failed initially due to weak administrator password. This was resolved by implementing a strong password policy meeting Windows Server requirements for domain controller promotion.
+
+NETWORK CONNECTIVITY VERIFICATION:
+Comprehensive testing was performed to verify network connectivity between all virtual machines using ping tests, DNS resolution tests, and domain authentication verification.
+
+DOMAIN JOIN PROCESS:
+The Windows 11 client domain join process required proper credential configuration and network connectivity verification before successful completion.
+
+================================================================================
+
+VERIFICATION AND TESTING PROCEDURES
+
+NETWORK CONNECTIVITY TESTING:
+- Ping tests between all virtual machines confirmed successful communication
+- DNS resolution testing verified proper domain name resolution
+- Internet connectivity testing confirmed NAT functionality
+
+DOMAIN SERVICES VERIFICATION:
+- Active Directory Domain Services operational status confirmed
+- DNS server functionality verified through nslookup testing
+- Domain user authentication tested and verified
+- Group Policy application confirmed
+
+SECURITY ISOLATION TESTING:
+- Network isolation from host system verified
+- Virtual network segmentation confirmed
+- Firewall configuration tested and validated
+
+PERFORMANCE AND STABILITY:
+- All virtual machines demonstrated stable operation
+- Resource utilization within acceptable parameters
+- Backup and recovery procedures tested
+
+================================================================================
+
+LABORATORY RESULTS AND ACHIEVEMENTS
+
+SUCCESSFUL IMPLEMENTATION:
+The laboratory exercise was completed successfully with all primary objectives achieved. The virtual network security test environment is fully operational and ready for advanced security testing activities.
+
+TECHNICAL ACHIEVEMENTS:
+- Complete virtual network infrastructure established
+- Domain controller services fully operational
+- Client machine successfully integrated into domain environment
+- Attack platform prepared for offensive security testing
+- Network security and isolation properly implemented
+
+PROFESSIONAL SKILLS DEVELOPED:
+- Virtualization technology implementation and management
+- Active Directory domain services configuration
+- Network security architecture design
+- Troubleshooting and problem resolution
+- Professional documentation and reporting
+
+================================================================================
+
+CONCLUSION
+
+The virtual network security test lab implementation was completed successfully, demonstrating proficiency in enterprise-level virtualization technologies and network security principles. The laboratory environment provides a robust foundation for advanced security testing activities while maintaining proper isolation and security controls.
+
+The implementation showcases understanding of:
+- Virtualization platform selection and configuration
+- Active Directory domain services implementation
+- Network architecture design and security principles
+- Professional troubleshooting and problem resolution
+- Industry-standard security testing environment preparation
+
+The laboratory environment is now prepared for advanced security testing exercises including malware analysis, penetration testing, and comprehensive security assessment activities. The successful implementation demonstrates readiness for professional-level security testing operations and provides a solid foundation for continued learning in network security disciplines.
+
+All laboratory objectives were achieved with a fully functional, secure, and professionally configured virtual network security test environment.
+
+================================================================================
+
+REFERENCES
+
+1. VMware Workstation Pro Documentation and User Guide
+2. Microsoft Windows Server 2022 Active Directory Services Documentation
+3. Kali Linux Official Documentation and Installation Guide
+4. Network Security Best Practices and Implementation Guidelines
+5. Virtualization Security Standards and Recommendations
+6. Active Directory Domain Services Configuration References
+7. Professional Security Testing Environment Setup Guidelines
+
+================================================================================
+
+END OF REPORT
