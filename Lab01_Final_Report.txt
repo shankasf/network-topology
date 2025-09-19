@@ -1,10 +1,4 @@
-Network Security Lab Report
-Lab 01: Virtual Network Security Test Lab Implementation
-
-Student: [Your Name]
-Date: [Current Date]
-Course: Network Security
-Instructor: [Instructor Name]
+Virtual Network Security Test Lab Implementation
 
 ================================================================================
 
